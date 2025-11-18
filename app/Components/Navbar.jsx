@@ -68,7 +68,7 @@ const Navbar = () => {
               Home
             </Link>
             <Link
-              href='#'
+              href='/series'
               className='text-white/60 hover:text-white text-[13px]'
             >
               TV Shows
