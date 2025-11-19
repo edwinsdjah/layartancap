@@ -1,12 +1,16 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import React from 'react';
 
-const MovieCard = ({ movie, type }) => {
+const MovieCard = ({ movie, type, onSelect }) => {
   const img = movie.backdrop_path
     ? `https://image.tmdb.org/t/p/w780${movie.backdrop_path}`
     : '/no-image.jpg';
   return (
-    <div className='relative group cursor-pointer rounded-xl overflow-hidden'>
+    <div
+      onClick={() => onSelect(movie)}
+      className='relative group cursor-pointer rounded-xl overflow-hidden'
+    >
       <Image
         src={img}
         alt={type === 'movie' ? movie.title : movie.name}

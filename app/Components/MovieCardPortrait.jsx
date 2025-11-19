@@ -1,14 +1,18 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import React from 'react';
 
-const MovieCardPortrait = ({ movie, type }) => {
+const MovieCardPortrait = ({ movie, type, onSelect }) => {
   // gunakan poster path (portrait)
   const img = movie.poster_path
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
     : '/no-image.jpg';
 
   return (
-    <div className='relative group cursor-pointer w-[140px] rounded-lg overflow-hidden'>
+    <div
+      onClick={() => onSelect(movie)}
+      className='relative group cursor-pointer w-[140px] rounded-lg overflow-hidden'
+    >
       {/* IMAGE */}
       <div className='relative h-[225px]'>
         <Image
