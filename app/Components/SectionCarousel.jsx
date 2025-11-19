@@ -1,5 +1,8 @@
+'use client';
 import MovieCardPortrait from './MovieCardPortrait';
 import MovieCard from './MovieCard';
+import { useState } from 'react';
+import Modal from './Modal';
 
 export default function SectionCarousel({
   title,
@@ -7,10 +10,37 @@ export default function SectionCarousel({
   variant = 'portrait',
   type,
 }) {
+  const [selected, setSelected] = useState(null);
+  const [open, setOpen] = useState(false);
   const CardComponent =
     variant === 'portrait' || variant === 'trending'
       ? MovieCardPortrait
       : MovieCard;
+
+  const handleSelect = async movie => {
+    try {
+      let fetchType = type === 'movie' ? 'movie' : 'tv';
+      // Fetch detail
+      const detailRes = await fetch(`/api/tmdb/${fetchType}/${movie.id}`);
+      const detail = await detailRes.json();
+      // Fetch credits
+      const creditsRes = await fetch(
+        `/api/tmdb/${fetchType}/${movie.id}/credits`
+      );
+      const credits = await creditsRes.json();
+      // Gabung data
+      const mergedData = {
+        ...detail,
+        cast: credits.cast?.slice(0, 5) || [],
+        crew: credits.crew || [],
+      };
+
+      setSelected(mergedData);
+      setOpen(true);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <section className='mb-8 relative'>
@@ -23,7 +53,7 @@ export default function SectionCarousel({
         {/* Fade kanan */}
         <div className='pointer-events-none absolute right-0 top-0 h-full w-5 bg-gradient-to-l from-black via-black/70 to-transparent z-10'></div>
 
-        <div className='flex gap-4 overflow-x-auto px-2 scrollbar-hide'>
+        <div className='flex gap-2 overflow-x-auto px-2 scrollbar-hide'>
           {data?.map((movie, i) => (
             <div key={movie.id} className='relative flex-shrink-0'>
               {/* ONLY for trending */}
@@ -40,10 +70,15 @@ export default function SectionCarousel({
                 </span>
               )}
 
-              <CardComponent movie={movie} type={type} />
+              <CardComponent
+                movie={movie}
+                type={type}
+                onSelect={handleSelect}
+              />
             </div>
           ))}
         </div>
+        <Modal isOpen={open} movie={selected} onClose={() => setOpen(false)} />
       </div>
     </section>
   );

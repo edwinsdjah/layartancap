@@ -10,23 +10,9 @@ const Hero = ({ movie, trailerKey }) => {
   const [isMuted, setIsMuted] = useState(true);
   const iframeRef = useRef(null);
   const [isAvailable, setIsAvailable] = useState(false);
-  async function getSuperembedVid() {
-    try {
-      const res = await fetch(
-        `https://layartancap.vercel.app/se_player.php?video_id=${movie.id}&tmdb=1`
-      );
-      if (res) {
-        setIsAvailable(true);
-      }
-      console.log(res);
-    } catch (error) {
-      console.log(error);
-    }
-  }
 
   useEffect(() => {
     // Fade in video setelah 2.5 detik
-    getSuperembedVid();
     const timer = setTimeout(() => setShowVideo(true), 2500);
     return () => clearTimeout(timer);
   }, [movie]);
