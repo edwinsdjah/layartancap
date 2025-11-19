@@ -36,3 +36,18 @@ body {
 .scrollbar-hide {
   scrollbar-width: none;
 }
+
+@layer utilities {
+  @keyframes slide {
+    0% {
+      transform: translateX(0%);
+    }
+    100% {
+      transform: translateX(350%);
+    }
+  }
+
+  .animate-slide {
+    animation: slide 1s ease-in-out infinite alternate;
+  }
+}

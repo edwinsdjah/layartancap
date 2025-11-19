@@ -18,10 +18,10 @@ export default function SectionCarousel({
 
       <div className='relative'>
         {/* Fade kiri */}
-        <div className='pointer-events-none absolute left-0 top-0 h-full w-10 bg-gradient-to-r from-black via-black/70 to-transparent z-10'></div>
+        <div className='pointer-events-none absolute left-0 top-0 h-full w-5 bg-gradient-to-r from-black via-black/70 to-transparent z-10'></div>
 
         {/* Fade kanan */}
-        <div className='pointer-events-none absolute right-0 top-0 h-full w-10 bg-gradient-to-l from-black via-black/70 to-transparent z-10'></div>
+        <div className='pointer-events-none absolute right-0 top-0 h-full w-5 bg-gradient-to-l from-black via-black/70 to-transparent z-10'></div>
 
         <div className='flex gap-4 overflow-x-auto px-2 scrollbar-hide'>
           {data?.map((movie, i) => (

@@ -7,7 +7,7 @@ const MovieCard = ({ movie, type }) => {
     ? `https://image.tmdb.org/t/p/w780${movie.backdrop_path}`
     : '/no-image.jpg';
   return (
-    <Link href={`/player/${movie.id}?tmdb=1`}>
+    <Link href={`/detail/${movie.id}?${type}=1`}>
       <div className='relative group cursor-pointer rounded-xl overflow-hidden'>
         <Image
           src={img}
