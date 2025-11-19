@@ -14,25 +14,42 @@ const Modal = ({ isOpen, movie, type, onClose }) => {
   const [videoReady, setVideoReady] = useState(false);
   const iframeRef = useRef(null);
 
+  const trailerKey = movie?.trailerKey;
+
+  useEffect(() => {
+    console.log('Modal movie changed:', movie?.id, movie?.title);
+    setVideoReady(false);
+    setSimiliar([]);
+  }, [movie?.id]);
+
+  // reset state saat movie baru
+  useEffect(() => {
+    if (!movie) return;
+    setVideoReady(false);
+    setSimiliar([]);
+  }, [movie?.id]);
+
   // fetch similiar
   useEffect(() => {
-    if (!isOpen || !movie?.genres?.length) {
-      setSimiliar([]);
-      return;
-    }
+    if (!isOpen || !movie?.genres?.length) return;
 
     const fetchSimiliar = async () => {
       setSimiliar([]);
       setLoading(true);
-      const genreId = movie.genres[0].id;
+
       const endpoint =
         type === 'tv'
-          ? `/api/tmdb/discover/tv?with_genres=${genreId}`
-          : `/api/tmdb/discover/movie?with_genres=${genreId}`;
+          ? `/api/tmdb/tv/${movie.id}/recommendations`
+          : `/api/tmdb/movie/${movie.id}/recommendations`;
+
       try {
         const res = await fetch(endpoint);
         const data = await res.json();
-        setSimiliar(data.results?.slice(0, 9) || []);
+        setSimiliar(
+          data.results
+            ?.filter(item => item.id !== movie.id) // exclude movie saat ini
+            .slice(0, 9) || []
+        );
       } catch (err) {
         console.error('Failed to load similar:', err);
         setSimiliar([]);
@@ -43,6 +60,24 @@ const Modal = ({ isOpen, movie, type, onClose }) => {
 
     fetchSimiliar();
   }, [movie?.id, type, isOpen]);
+
+  const toggleMute = () => {
+    setIsMuted(prev => !prev);
+    if (iframeRef.current) {
+      iframeRef.current.contentWindow.postMessage(
+        JSON.stringify({
+          event: 'command',
+          func: isMuted ? 'unMute' : 'mute',
+          args: [],
+        }),
+        '*'
+      );
+    }
+  };
+
+  const handleIframeLoad = () => {
+    setVideoReady(true);
+  };
 
   if (!isOpen || !movie) return null;
 
@@ -61,31 +96,11 @@ const Modal = ({ isOpen, movie, type, onClose }) => {
 
   const cast = movie.cast || [];
 
-  const toggleMute = () => {
-    setIsMuted(prev => !prev);
-    if (iframeRef.current) {
-      iframeRef.current.contentWindow.postMessage(
-        JSON.stringify({
-          event: 'command',
-          func: isMuted ? 'unMute' : 'mute',
-          args: [],
-        }),
-        '*'
-      );
-    }
-  };
-
-  const trailerKey = movie.trailerKey;
-
-  const handleIframeLoad = () => {
-    setVideoReady(true);
-  };
-
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          key={movie?.id}
+          key={movie.id} // paksa remount tiap movie baru
           className='fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm'
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -214,10 +229,7 @@ const Modal = ({ isOpen, movie, type, onClose }) => {
                     No similar titles found.
                   </p>
                 ) : (
-                  <div
-                    key={movie?.id}
-                    className='grid grid-cols-1 sm:grid-cols-3 gap-3'
-                  >
+                  <div className='grid grid-cols-1 sm:grid-cols-3 gap-3'>
                     {similiar.map(item => (
                       <SimiliarCard key={item.id} item={item} />
                     ))}
