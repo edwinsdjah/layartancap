@@ -9,9 +9,24 @@ const Hero = ({ movie, trailerKey }) => {
   const [showVideo, setShowVideo] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const iframeRef = useRef(null);
+  const [isAvailable, setIsAvailable] = useState(false);
+  async function getSuperembedVid() {
+    try {
+      const res = await fetch(
+        `https://layartancap.vercel.app/se_player.php?video_id=${movie.id}&tmdb=1`
+      );
+      if (res) {
+        setIsAvailable(true);
+      }
+      console.log(res);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   useEffect(() => {
     // Fade in video setelah 2.5 detik
+    getSuperembedVid();
     const timer = setTimeout(() => setShowVideo(true), 2500);
     return () => clearTimeout(timer);
   }, [movie]);
@@ -77,7 +92,7 @@ const Hero = ({ movie, trailerKey }) => {
 
         <div className='flex gap-3 items-center'>
           <Link
-            href={`/movie/${movie.id}`}
+            href={isAvailable ? 'OK' : 'NOT OK'}
             className='flex items-center gap-2 bg-white text-black px-6 py-2 rounded-md font-semibold shadow-md hover:bg-gray-200 transition'
           >
             <i className='fa fa-play text-sm'></i> Play
