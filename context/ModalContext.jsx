@@ -1,5 +1,6 @@
 'use client';
 import { createContext, useContext, useState } from 'react';
+import Modal from '../app/Components/Modal';
 
 const ModalContext = createContext();
 
@@ -62,6 +63,7 @@ export function ModalProvider({ children }) {
       }}
     >
       {children}
+      <Modal />
     </ModalContext.Provider>
   );
 }

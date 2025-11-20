@@ -3,7 +3,7 @@ import Link from 'next/link';
 import React from 'react';
 import { useModal } from '../../context/ModalContext';
 
-const MovieCard = ({ movie, type, onSelect }) => {
+const MovieCard = ({ movie, type }) => {
   const { openModal } = useModal();
   const img = movie.backdrop_path
     ? `https://image.tmdb.org/t/p/w780${movie.backdrop_path}`
