@@ -4,16 +4,26 @@ import Link from 'next/link';
 import React, { useEffect, useRef, useState } from 'react';
 import { FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
 import InfoButton from './InfoButton';
+import PlayButton from './PlayButton';
 
-const Hero = ({ movie, trailerKey }) => {
+
+const Hero = ({ movie, trailerKey,type }) => {
   const [showVideo, setShowVideo] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const iframeRef = useRef(null);
+
   const [isAvailable, setIsAvailable] = useState(false);
 
   useEffect(() => {
-    // Fade in video setelah 2.5 detik
-    const timer = setTimeout(() => setShowVideo(true), 2500);
+    if (!movie) return;
+
+    // fade in video
+    if (trailerKey) {
+      const timer = setTimeout(() => setShowVideo(true), 2500);
+      return () => clearTimeout(timer);
+    }
+
+
     return () => clearTimeout(timer);
   }, [movie]);
 
@@ -38,73 +48,67 @@ const Hero = ({ movie, trailerKey }) => {
   };
 
   return (
-    <div className='relative w-full h-screen text-white overflow-hidden'>
-      {/* BACKDROP IMAGE */}
-      <Image
-        src={img}
-        alt={movie.title}
-        fill
-        className={`object-cover transition-opacity duration-1000 ${
-          showVideo ? 'opacity-0' : 'opacity-100'
-        }`}
-        priority
-      />
-
-      {/* VIDEO TRAILER */}
-      {trailerKey && (
-        <iframe
-          ref={iframeRef}
-          src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=${
-            isMuted ? 1 : 0
-          }&controls=0&loop=1&playlist=${trailerKey}&modestbranding=1&showinfo=0`}
-          className={`
-      absolute top-1/2 left-1/2
-      w-[120%] h-[120%]
-      -translate-x-1/2 -translate-y-1/2
-      transition-opacity duration-1000
-      ${showVideo ? 'opacity-100' : 'opacity-0'}
-    `}
-          allow='autoplay; encrypted-media'
+    <>
+      <div className='relative w-full h-screen text-white overflow-hidden'>
+        
+        {/* BACKDROP IMAGE */}
+        <Image
+          src={img}
+          alt={type === 'movie' ? movie.title : movie.name}
+          fill
+          className={`object-cover transition-opacity duration-1000 ${
+            showVideo ? 'opacity-0' : 'opacity-100'
+          }`}
+          priority
         />
-      )}
 
-      {/* GRADIENT OVERLAY */}
-      <div className='absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent' />
+        {/* TRAILER */}
+        {trailerKey && (
+          <iframe
+            ref={iframeRef}
+            src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=${
+              isMuted ? 1 : 0
+            }&controls=0&loop=1&playlist=${trailerKey}`}
+            className={`
+              absolute top-1/2 left-1/2
+              w-[120%] h-[120%]
+              -translate-x-1/2 -translate-y-1/2
+              transition-opacity duration-1000
+              ${showVideo ? 'opacity-100' : 'opacity-0'}
+            `}
+            allow='autoplay; encrypted-media'
+          />
+        )}
 
-      {/* HERO CONTENT */}
-      <div className='absolute bottom-[20%] left-6 md:left-12 max-w-2xl z-20'>
-        <h1 className='text-4xl md:text-6xl font-bold drop-shadow-lg mb-4'>
-          {movie.title}
-        </h1>
-        <p className='text-sm md:text-lg text-white/80 max-w-xl line-clamp-3 mb-6'>
-          {movie.overview}
-        </p>
+        {/* GRADIENT */}
+        <div className='absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent' />
 
-        <div className='flex gap-3 items-center'>
-          <Link
-            href={isAvailable ? 'OK' : 'NOT OK'}
-            className='flex items-center gap-2 bg-white text-black px-6 py-2 rounded-md font-semibold shadow-md hover:bg-gray-200 transition'
-          >
-            <i className='fa fa-play text-sm'></i> Play
-          </Link>
-          <InfoButton movie={movie} />
-          {/* MUTE/UNMUTE BUTTON */}
-          <button
-            onClick={toggleMute}
-            className='flex cursor-pointer items-center justify-center p-3 rounded-full bg-black/50 hover:bg-black/70 transition text-white text-xl'
-          >
-            {isMuted ? (
-              <FaVolumeMute className='transition-transform duration-300' />
-            ) : (
-              <FaVolumeUp className='transition-transform duration-300' />
-            )}
-          </button>
+        {/* CONTENT */}
+        <div className='absolute bottom-[20%] left-6 md:left-12 max-w-2xl z-20'>
+          <h1 className='text-4xl md:text-6xl font-bold mb-4'>
+            {type === 'movie' ? movie.title : movie.name}
+          </h1>
+          <p className='text-sm md:text-lg text-white/80 max-w-xl line-clamp-3 mb-6'>
+            {movie.overview}
+          </p>
+
+          <div className='flex gap-3 items-center'>
+
+            <PlayButton id={movie.id} type='movie'/>
+
+            <InfoButton movie={movie} />
+
+            {/* MUTE BUTTON */}
+            <button
+              onClick={toggleMute}
+              className='flex cursor-pointer items-center justify-center p-3 rounded-full bg-black/50 hover:bg-black/70 text-white text-xl'
+            >
+              {isMuted ? <FaVolumeMute /> : <FaVolumeUp />}
+            </button>
+          </div>
         </div>
       </div>
-
-      {/* BOTTOM FADE */}
-      <div className='absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-black to-transparent' />
-    </div>
+    </>
   );
 };
 

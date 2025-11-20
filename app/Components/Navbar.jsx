@@ -63,31 +63,31 @@ const Navbar = () => {
           <section className='flex gap-4'>
             <Link
               href='/'
-              className='text-white/60 hover:text-white text-[13px]'
+              className='text-white/60 hover:text-white text-[16px]'
             >
               Home
             </Link>
             <Link
               href='/series'
-              className='text-white/60 hover:text-white text-[13px]'
+              className='text-white/60 hover:text-white text-[16px]'
             >
               TV Shows
             </Link>
             <Link
               href='#'
-              className='text-white/60 hover:text-white text-[13px]'
+              className='text-white/60 hover:text-white text-[16px]'
             >
               Movies
             </Link>
             <Link
               href='#'
-              className='text-white/60 hover:text-white text-[13px]'
+              className='text-white/60 hover:text-white text-[16px]'
             >
               News & Popular
             </Link>
             <Link
               href='/list'
-              className='text-white/60 hover:text-white text-[13px]'
+              className='text-white/60 hover:text-white text-[16px]'
             >
               List
             </Link>

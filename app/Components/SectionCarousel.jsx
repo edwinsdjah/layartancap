@@ -30,7 +30,7 @@ export default function SectionCarousel({
                 </span>
               )}
 
-              <CardComponent movie={movie} type={type} />
+              <CardComponent movie={movie} type={movie.type || type} />
             </div>
           ))}
         </div>

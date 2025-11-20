@@ -6,18 +6,18 @@ import React, { useEffect, useRef, useState } from 'react';
 import SimiliarCard from './SimiliarCard';
 import { FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
 import { useModal } from '@/context/ModalContext'; // ⬅️ IMPORT CONTEXT
+import PlayButton from './PlayButton';
 
 const Modal = () => {
   const { open, selected: movie, closeModal } = useModal(); // ⬅️ AMBIL DARI CONTEXT
   const isOpen = open;
   const type = movie?.type; // 'movie' / 'tv'
-
   const [similiar, setSimiliar] = useState([]);
   const [loading, setLoading] = useState(false);
-
   const [isMuted, setIsMuted] = useState(true);
   const [videoReady, setVideoReady] = useState(false);
   const iframeRef = useRef(null);
+
 
   const trailerKey = movie?.trailerKey;
 
@@ -29,8 +29,10 @@ const Modal = () => {
   }, [movie?.id]);
 
   useEffect(() => {
-    const timer = setTimeout(() => setVideoReady(true), 2500);
-    return () => clearTimeout(timer);
+    if(trailerKey){
+      const timer = setTimeout(() => setVideoReady(true), 2500);
+      return () => clearTimeout(timer);
+    }
   }, [movie]);
 
   // fetch similiar
@@ -203,12 +205,7 @@ const Modal = () => {
               </div>
 
               <div className='flex gap-3 mb-4'>
-                <Link
-                  href={`/detail/${movie.id}?${movie.type}=1`}
-                  className='bg-white text-black px-6 py-2 font-semibold rounded-md hover:bg-gray-200 transition'
-                >
-                  Play
-                </Link>
+                  <PlayButton id={movie.id} type={type}/>
               </div>
 
               <div className='mb-6'>
@@ -225,14 +222,13 @@ const Modal = () => {
                 ) : (
                   <div className='grid grid-cols-1 sm:grid-cols-3 gap-3'>
                     {similiar.map(item => (
-                      <SimiliarCard key={item.id} item={item} />
+                      <SimiliarCard key={item.id} item={item} id={item.id} type={type} />
                     ))}
                   </div>
                 )}
               </div>
             </div>
 
-            <div className='absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-[#141414] to-transparent' />
           </motion.div>
         </motion.div>
       )}
