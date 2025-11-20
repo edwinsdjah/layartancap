@@ -6,7 +6,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import SimiliarCard from './SimiliarCard';
 import { FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
 
-const Modal = ({ isOpen, movie, type, onClose }) => {
+const Modal = ({ isOpen, movie, type, onClose, trailer }) => {
   const [similiar, setSimiliar] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -15,19 +15,18 @@ const Modal = ({ isOpen, movie, type, onClose }) => {
   const iframeRef = useRef(null);
 
   const trailerKey = movie?.trailerKey;
-
-  useEffect(() => {
-    console.log('Modal movie changed:', movie?.id, movie?.title);
-    setVideoReady(false);
-    setSimiliar([]);
-  }, [movie?.id]);
-
   // reset state saat movie baru
   useEffect(() => {
     if (!movie) return;
     setVideoReady(false);
     setSimiliar([]);
   }, [movie?.id]);
+
+  useEffect(() => {
+    // Fade in video setelah 2.5 detik
+    const timer = setTimeout(() => setVideoReady(true), 2500);
+    return () => clearTimeout(timer);
+  }, [movie]);
 
   // fetch similiar
   useEffect(() => {
@@ -73,10 +72,6 @@ const Modal = ({ isOpen, movie, type, onClose }) => {
         '*'
       );
     }
-  };
-
-  const handleIframeLoad = () => {
-    setVideoReady(true);
   };
 
   if (!isOpen || !movie) return null;
@@ -132,7 +127,6 @@ const Modal = ({ isOpen, movie, type, onClose }) => {
               {trailerKey && (
                 <iframe
                   ref={iframeRef}
-                  onLoad={handleIframeLoad}
                   src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=${
                     isMuted ? 1 : 0
                   }&controls=0&loop=1&playlist=${trailerKey}&modestbranding=1&showinfo=0`}
@@ -140,10 +134,8 @@ const Modal = ({ isOpen, movie, type, onClose }) => {
                     videoReady ? 'opacity-100' : 'opacity-0'
                   }`}
                   allow='autoplay; encrypted-media'
-                  allowFullScreen
                 />
               )}
-
               {/* GRADIENT OVERLAY */}
               <div className='absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-[#141414]' />
 
