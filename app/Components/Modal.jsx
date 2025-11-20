@@ -130,12 +130,17 @@ const Modal = ({ isOpen, movie, type, onClose, trailer }) => {
                   src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=${
                     isMuted ? 1 : 0
                   }&controls=0&loop=1&playlist=${trailerKey}&modestbranding=1&showinfo=0`}
-                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
-                    videoReady ? 'opacity-100' : 'opacity-0'
-                  }`}
+                  className={`
+      absolute top-1/2 left-1/2
+      w-[180%] h-[180%]
+      -translate-x-1/2 -translate-y-1/2
+      transition-opacity duration-1000
+      ${videoReady ? 'opacity-100' : 'opacity-0'}
+    `}
                   allow='autoplay; encrypted-media'
                 />
               )}
+
               {/* GRADIENT OVERLAY */}
               <div className='absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-[#141414]' />
 
