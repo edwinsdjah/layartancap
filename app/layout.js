@@ -4,6 +4,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import 'font-awesome/css/font-awesome.min.css';
 import Navbar from './Components/Navbar';
 import Footer from './Components/Footer';
+import { ModalProvider } from '../context/ModalContext';
 
 const bebas = Bebas_Neue({
   weight: '400',
@@ -32,9 +33,11 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${bebas.variable} antialiased`}
       >
-        <Navbar />
-        <main>{children}</main>
-        <Footer />
+        <ModalProvider>
+          <Navbar />
+          <main>{children}</main>
+          <Footer />
+        </ModalProvider>
       </body>
     </html>
   );

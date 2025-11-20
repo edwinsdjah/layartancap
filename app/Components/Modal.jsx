@@ -5,8 +5,13 @@ import Link from 'next/link';
 import React, { useEffect, useRef, useState } from 'react';
 import SimiliarCard from './SimiliarCard';
 import { FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
+import { useModal } from '@/context/ModalContext'; // ⬅️ IMPORT CONTEXT
 
-const Modal = ({ isOpen, movie, type, onClose, trailer }) => {
+const Modal = () => {
+  const { open, selected: movie, closeModal } = useModal(); // ⬅️ AMBIL DARI CONTEXT
+  const isOpen = open;
+  const type = movie?.type; // 'movie' / 'tv'
+
   const [similiar, setSimiliar] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -15,6 +20,7 @@ const Modal = ({ isOpen, movie, type, onClose, trailer }) => {
   const iframeRef = useRef(null);
 
   const trailerKey = movie?.trailerKey;
+
   // reset state saat movie baru
   useEffect(() => {
     if (!movie) return;
@@ -23,21 +29,20 @@ const Modal = ({ isOpen, movie, type, onClose, trailer }) => {
   }, [movie?.id]);
 
   useEffect(() => {
-    // Fade in video setelah 2.5 detik
     const timer = setTimeout(() => setVideoReady(true), 2500);
     return () => clearTimeout(timer);
   }, [movie]);
 
   // fetch similiar
   useEffect(() => {
-    if (!isOpen || !movie?.genres?.length) return;
+    if (!isOpen || !movie?.id) return;
 
     const fetchSimiliar = async () => {
       setSimiliar([]);
       setLoading(true);
 
       const endpoint =
-        type === 'tv'
+        movie.type === 'tv'
           ? `/api/tmdb/tv/${movie.id}/recommendations`
           : `/api/tmdb/movie/${movie.id}/recommendations`;
 
@@ -45,9 +50,7 @@ const Modal = ({ isOpen, movie, type, onClose, trailer }) => {
         const res = await fetch(endpoint);
         const data = await res.json();
         setSimiliar(
-          data.results
-            ?.filter(item => item.id !== movie.id) // exclude movie saat ini
-            .slice(0, 9) || []
+          data.results?.filter(item => item.id !== movie.id).slice(0, 9) || []
         );
       } catch (err) {
         console.error('Failed to load similar:', err);
@@ -58,7 +61,7 @@ const Modal = ({ isOpen, movie, type, onClose, trailer }) => {
     };
 
     fetchSimiliar();
-  }, [movie?.id, type, isOpen]);
+  }, [movie?.id, isOpen]);
 
   const toggleMute = () => {
     setIsMuted(prev => !prev);
@@ -85,7 +88,7 @@ const Modal = ({ isOpen, movie, type, onClose, trailer }) => {
 
   const runtime = movie.runtime
     ? `${movie.runtime} min`
-    : type === 'tv'
+    : movie.type === 'tv'
     ? `${movie.number_of_seasons} Seasons`
     : '—';
 
@@ -95,13 +98,13 @@ const Modal = ({ isOpen, movie, type, onClose, trailer }) => {
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          key={movie.id} // paksa remount tiap movie baru
+          key={movie.id}
           className='fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 backdrop-blur-sm'
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          <div className='absolute inset-0' onClick={onClose}></div>
+          <div className='absolute inset-0' onClick={closeModal}></div>
 
           <motion.div
             className='relative w-[90%] max-w-4xl bg-[#141414] rounded-xl max-h-[90vh] overflow-y-auto shadow-2xl'
@@ -113,7 +116,6 @@ const Modal = ({ isOpen, movie, type, onClose, trailer }) => {
           >
             {/* HEADER VIDEO */}
             <div className='relative w-full h-64 rounded-t-xl overflow-hidden'>
-              {/* BACKDROP IMAGE */}
               <Image
                 src={img}
                 alt={movie.title || movie.name}
@@ -123,40 +125,36 @@ const Modal = ({ isOpen, movie, type, onClose, trailer }) => {
                 }`}
               />
 
-              {/* VIDEO TRAILER */}
               {trailerKey && (
                 <iframe
                   ref={iframeRef}
                   src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=${
                     isMuted ? 1 : 0
-                  }&controls=0&loop=1&playlist=${trailerKey}&modestbranding=1&showinfo=0`}
+                  }&controls=0&loop=1&playlist=${trailerKey}`}
                   className={`
-      absolute top-1/2 left-1/2
-      w-[180%] h-[180%]
-      -translate-x-1/2 -translate-y-1/2
-      transition-opacity duration-1000
-      ${videoReady ? 'opacity-100' : 'opacity-0'}
-    `}
+                    absolute top-1/2 left-1/2
+                    w-[180%] h-[180%]
+                    -translate-x-1/2 -translate-y-1/2
+                    transition-opacity duration-1000
+                    ${videoReady ? 'opacity-100' : 'opacity-0'}
+                  `}
                   allow='autoplay; encrypted-media'
                 />
               )}
 
-              {/* GRADIENT OVERLAY */}
               <div className='absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-[#141414]' />
 
-              {/* CLOSE BUTTON */}
               <button
-                onClick={onClose}
+                onClick={closeModal}
                 className='absolute top-3 right-3 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 z-10'
               >
                 ✕
               </button>
 
-              {/* MUTE BUTTON */}
               {trailerKey && (
                 <button
                   onClick={toggleMute}
-                  className='absolute top-3 left-3 flex cursor-pointer items-center justify-center p-2 rounded-full bg-black/50 hover:bg-black/70 transition text-white text-lg'
+                  className='absolute top-3 left-3 flex items-center justify-center p-2 rounded-full bg-black/50 hover:bg-black/70 transition text-white text-lg'
                 >
                   {isMuted ? <FaVolumeMute /> : <FaVolumeUp />}
                 </button>
@@ -206,14 +204,13 @@ const Modal = ({ isOpen, movie, type, onClose, trailer }) => {
 
               <div className='flex gap-3 mb-4'>
                 <Link
-                  href={`/detail/${movie.id}?${type}=1`}
+                  href={`/detail/${movie.id}?${movie.type}=1`}
                   className='bg-white text-black px-6 py-2 font-semibold rounded-md hover:bg-gray-200 transition'
                 >
                   Play
                 </Link>
               </div>
 
-              {/* More like this */}
               <div className='mb-6'>
                 <h3 className='text-xl font-semibold mb-3'>More like this</h3>
 

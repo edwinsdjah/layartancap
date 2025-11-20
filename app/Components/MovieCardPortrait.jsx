@@ -1,16 +1,18 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
+import { useModal } from '../../context/ModalContext';
 
-const MovieCardPortrait = ({ movie, type, onSelect }) => {
+const MovieCardPortrait = ({ movie, type }) => {
   // gunakan poster path (portrait)
+  const { openModal } = useModal();
   const img = movie.poster_path
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
     : '/no-image.jpg';
 
   return (
     <div
-      onClick={() => onSelect(movie)}
+      onClick={() => openModal(movie, type)}
       className='relative group cursor-pointer w-[140px] rounded-lg overflow-hidden'
     >
       {/* IMAGE */}
