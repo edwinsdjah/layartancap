@@ -20,6 +20,13 @@ export default function SectionCarousel({
   const handleSelect = async movie => {
     try {
       let fetchType = type === 'movie' ? 'movie' : 'tv';
+      const videoRes = await fetch(
+        `/api/tmdb/${fetchType}/${movie.id}/videos?language=en-US`
+      );
+      const videoData = await videoRes.json();
+      const trailer = videoData.results?.find(
+        v => v.type === 'Trailer' && v.site === 'YouTube'
+      );
       // Fetch detail
       const detailRes = await fetch(`/api/tmdb/${fetchType}/${movie.id}`);
       const detail = await detailRes.json();
@@ -33,6 +40,7 @@ export default function SectionCarousel({
         ...detail,
         cast: credits.cast?.slice(0, 5) || [],
         crew: credits.crew || [],
+        trailerKey: trailer?.key || null,
       };
 
       setSelected(mergedData);
