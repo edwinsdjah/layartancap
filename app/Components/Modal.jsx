@@ -29,8 +29,10 @@ const Modal = () => {
   }, [movie?.id]);
 
   useEffect(() => {
-    const timer = setTimeout(() => setVideoReady(true), 2500);
-    return () => clearTimeout(timer);
+    if(trailerKey){
+      const timer = setTimeout(() => setVideoReady(true), 2500);
+      return () => clearTimeout(timer);
+    }
   }, [movie]);
 
   // fetch similiar
@@ -220,7 +222,7 @@ const Modal = () => {
                 ) : (
                   <div className='grid grid-cols-1 sm:grid-cols-3 gap-3'>
                     {similiar.map(item => (
-                      <SimiliarCard key={item.id} item={item} />
+                      <SimiliarCard key={item.id} item={item} id={item.id} type={type} />
                     ))}
                   </div>
                 )}

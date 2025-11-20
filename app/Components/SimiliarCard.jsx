@@ -1,7 +1,10 @@
+import { useModal } from '@/context/ModalContext';
 import Image from 'next/image';
 import React from 'react';
 
-const SimiliarCard = ({ item }) => {
+
+const SimiliarCard = ({ item, id, type }) => {
+  const {openModal} = useModal();
   const imgUrl = item.backdrop_path
     ? `https://image.tmdb.org/t/p/w780${item.backdrop_path}`
     : '/fallback-backdrop.jpg';
@@ -10,7 +13,7 @@ const SimiliarCard = ({ item }) => {
     item.release_date?.slice(0, 4) || item.first_air_date?.slice(0, 4) || '-';
 
   return (
-    <div className='bg-gray-600 rounded-lg overflow-hidden cursor-pointer group shadow-md hover:shadow-lg transition'>
+    <div onClick={()=> {openModal(item, type)}} className='bg-gray-600 rounded-lg overflow-hidden cursor-pointer group shadow-md hover:shadow-lg transition'>
       {/* BACKDROP IMAGE */}
       <div className='relative w-full h-40 sm:h-48'>
         <Image

@@ -8,8 +8,10 @@ import {
 import SectionCarousel from "./Components/SectionCarousel";
 import Hero from "./Components/Hero";
 import { getTrendingSeries } from "../lib/tmdb/series";
+import { getTrendingMixed } from "@/lib/tmdb/mixed";
 
 export default async function Home() {
+  const dataTrendingMixed = await getTrendingMixed(10);
   const dataResultThisWeek = await getTrendingMovieThisWeek();
   const dataNowPlaying = await getNowPlayingMovies();
   const dataTopRated = await getTopRatedMovies();
@@ -28,10 +30,13 @@ export default async function Home() {
       <main className="p-6">
         <SectionCarousel
           title="Trending This Week"
-          data={dataResultThisWeek}
+          data={dataTrendingMixed.map((item) => ({
+            ...item,
+            type: item.media_type === "tv" ? "series" : "movie",
+          }))}
           variant="trending"
-          type="movie"
-        ></SectionCarousel>
+        />
+
         <SectionCarousel
           title="Now Playing"
           data={dataNowPlaying}
