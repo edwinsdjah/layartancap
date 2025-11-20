@@ -64,7 +64,7 @@ const Hero = ({ movie, trailerKey }) => {
       )}
 
       {/* GRADIENT OVERLAY */}
-      <div className='absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent' />
+      <div className='absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent' />
 
       {/* HERO CONTENT */}
       <div className='absolute bottom-[20%] left-6 md:left-12 max-w-2xl z-20'>
