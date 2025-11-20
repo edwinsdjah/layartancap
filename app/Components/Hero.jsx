@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useRef, useState } from 'react';
 import { FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
+import InfoButton from './InfoButton';
 
 const Hero = ({ movie, trailerKey }) => {
   const [showVideo, setShowVideo] = useState(false);
@@ -86,14 +87,7 @@ const Hero = ({ movie, trailerKey }) => {
           >
             <i className='fa fa-play text-sm'></i> Play
           </Link>
-
-          <Link
-            href={`/movie/${movie.id}`}
-            className='flex items-center gap-2 bg-gray-600/60 px-6 py-2 rounded-md font-semibold backdrop-blur-md border border-white/20 hover:bg-gray-600/40 transition'
-          >
-            <i className='fa fa-info-circle text-sm'></i> More Info
-          </Link>
-
+          <InfoButton movie={movie} />
           {/* MUTE/UNMUTE BUTTON */}
           <button
             onClick={toggleMute}
