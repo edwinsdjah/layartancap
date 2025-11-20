@@ -11,11 +11,7 @@ export async function GET(req) {
       : `https://multiembed.mov/?video_id=${id}&tmdb=1&s=1&e=1`;
 
   try {
-    const res = await fetch(url, {
-      method: "HEAD",
-      cache: "no-store",
-    });
-
+    const res = await fetch(url, { method: "GET", cache: "no-store" });
     return Response.json({ available: res.ok });
   } catch (e) {
     return Response.json({ available: false });
