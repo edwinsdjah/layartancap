@@ -7,20 +7,16 @@ import PlayButton from './PlayButton';
 import { useDeviceStore } from '@/stores/useDeviceStore';
 import { initDeviceDetection } from '@/helpers/detectDevice';
 
-
-const Hero = ({ movie, trailerKey,type }) => {
+const Hero = ({ movie, trailerKey, type }) => {
   const setIsSP = useDeviceStore(state => state.setIsSP);
-  const isSP = useDeviceStore(state=> state.isSP)
+  const isSP = useDeviceStore(state => state.isSP);
   const [showVideo, setShowVideo] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const iframeRef = useRef(null);
 
-  const [isAvailable, setIsAvailable] = useState(false);
-
   useEffect(() => {
     if (!movie) return;
     const cleanup = initDeviceDetection(setIsSP);
-    // fade in video
     if (trailerKey) {
       const timer = setTimeout(() => setShowVideo(true), 2500);
       return () => clearTimeout(timer);
@@ -32,6 +28,9 @@ const Hero = ({ movie, trailerKey,type }) => {
 
   const img = movie.backdrop_path
     ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}`
+    : '/no-image.jpg';
+  const portrait = movie.poster_path
+    ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
     : '/no-image.jpg';
 
   const toggleMute = () => {
@@ -48,10 +47,53 @@ const Hero = ({ movie, trailerKey,type }) => {
     }
   };
 
+  if (isSP) {
+    return (
+      <div className='relative w-full flex flex-col items-center pt-24 pb-12 text-white'>
+        {/* BACKGROUND GRADIENT (SP ONLY) */}
+        <div
+          className='absolute inset-0
+        bg-gradient-to-t
+        from-black
+        via-[#111]
+        to-[#1c1c1c]
+        opacity-90
+        pointer-events-none'
+        />
+
+        {/* POSTER */}
+        <div className='w-[70vw] relative'>
+          <Image
+            src={portrait}
+            alt={movie.title || movie.name}
+            width={500}
+            height={750}
+            className='rounded-2xl shadow-xl object-cover w-full h-auto mx-auto'
+          />
+        </div>
+
+        {/* BUTTONS */}
+        <div className='flex gap-3 mt-6 relative'>
+          <PlayButton
+            id={movie.id}
+            type={type}
+            season={type === 'series' ? '1' : ''}
+            episode={type === 'series' ? '1' : ''}
+          />
+
+          <InfoButton movie={movie} type={type} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
-      <div className={`relative w-full ${isSP? `h-130` : `h-screen`} text-white overflow-hidden`}>
-        
+      <div
+        className={`relative w-full ${
+          isSP ? `h-130` : `h-screen`
+        } text-white overflow-hidden`}
+      >
         {/* BACKDROP IMAGE */}
         <Image
           src={img}
@@ -94,10 +136,14 @@ const Hero = ({ movie, trailerKey,type }) => {
           </p>
 
           <div className='flex gap-3 items-center'>
+            <PlayButton
+              id={movie.id}
+              type={type}
+              season={type === 'series' ? '1' : ''}
+              episode={type === 'series' ? '1' : ''}
+            />
 
-            <PlayButton id={movie.id} type='movie'/>
-
-            <InfoButton movie={movie} />
+            <InfoButton movie={movie} type={type} />
 
             {/* MUTE BUTTON */}
             <button

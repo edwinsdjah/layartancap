@@ -18,15 +18,16 @@ export default function SectionCarousel({
       <h2 className='text-2xl font-bold mb-3'>{title}</h2>
 
       <div className='relative'>
-
         <div className='flex gap-2 overflow-x-auto px-2 scrollbar-hide'>
           {data?.map((movie, i) => (
             <div key={movie.id} className='relative flex-shrink-0'>
               {variant === 'trending' && (
-               <span className='absolute -left-2 bottom-2 text-[100px] font-extrabold z-10
-             text-black [text-shadow:2px_2px_0_white,-2px_-2px_0_white,2px_-2px_0_white,-2px_2px_0_white]'>
-                {i + 1}
-              </span>
+                <span
+                  className='absolute -left-2 bottom-2 text-[100px] font-extrabold z-2
+             text-black [text-shadow:2px_2px_0_white,-2px_-2px_0_white,2px_-2px_0_white,-2px_2px_0_white]'
+                >
+                  {i + 1}
+                </span>
               )}
 
               <CardComponent movie={movie} type={movie.type || type} />
