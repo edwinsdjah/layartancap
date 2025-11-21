@@ -1,13 +1,16 @@
 'use client';
 import Image from 'next/image';
-import Link from 'next/link';
 import React, { useEffect, useRef, useState } from 'react';
 import { FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
 import InfoButton from './InfoButton';
 import PlayButton from './PlayButton';
+import { useDeviceStore } from '@/stores/useDeviceStore';
+import { initDeviceDetection } from '@/helpers/detectDevice';
 
 
 const Hero = ({ movie, trailerKey,type }) => {
+  const setIsSP = useDeviceStore(state => state.setIsSP);
+  const isSP = useDeviceStore(state=> state.isSP)
   const [showVideo, setShowVideo] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const iframeRef = useRef(null);
@@ -16,16 +19,14 @@ const Hero = ({ movie, trailerKey,type }) => {
 
   useEffect(() => {
     if (!movie) return;
-
+    const cleanup = initDeviceDetection(setIsSP);
     // fade in video
     if (trailerKey) {
       const timer = setTimeout(() => setShowVideo(true), 2500);
       return () => clearTimeout(timer);
     }
-
-
-    return () => clearTimeout(timer);
-  }, [movie]);
+    return () => cleanup && cleanup();
+  }, [movie, setIsSP]);
 
   if (!movie) return null;
 
@@ -49,7 +50,7 @@ const Hero = ({ movie, trailerKey,type }) => {
 
   return (
     <>
-      <div className='relative w-full h-screen text-white overflow-hidden'>
+      <div className={`relative w-full ${isSP? `h-130` : `h-screen`} text-white overflow-hidden`}>
         
         {/* BACKDROP IMAGE */}
         <Image

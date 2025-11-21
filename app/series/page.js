@@ -8,8 +8,9 @@ import {
   getTrendingSeries,
 } from "../../lib/tmdb/series";
 import Hero from "../Components/Hero";
+import MainWrapper from "../Components/MainWrapper";
 
-const list = async () => {
+export default async function ListPage() {
   const dataTrendingSeries = await getTrendingSeries();
   const randomIndex = Math.floor(Math.random() * dataTrendingSeries.length);
   const heroSeries = dataTrendingSeries[randomIndex];
@@ -27,7 +28,7 @@ const list = async () => {
   return (
     <>
       <Hero movie={heroSeries} trailerKey={trailer?.key} type="series" />
-      <main className="p-6 pt-[80px]">
+      <MainWrapper>
         <SectionCarousel
           title="Recommended TV Series"
           data={dataTrendingSeries}
@@ -46,7 +47,6 @@ const list = async () => {
           variant="landscape"
           type="series"
         />
-
         <SectionCarousel
           title="Comedy TV Series"
           data={dataComedySeries}
@@ -71,9 +71,7 @@ const list = async () => {
           variant="landscape"
           type="series"
         />
-      </main>
+      </MainWrapper>
     </>
   );
-};
-
-export default list;
+}

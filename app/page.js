@@ -9,6 +9,7 @@ import SectionCarousel from "./Components/SectionCarousel";
 import Hero from "./Components/Hero";
 import { getTrendingSeries } from "../lib/tmdb/series";
 import { getTrendingMixed } from "@/lib/tmdb/mixed";
+import MainWrapper from "./Components/MainWrapper";
 
 export default async function Home() {
   const dataTrendingMixed = await getTrendingMixed(10);
@@ -27,7 +28,7 @@ export default async function Home() {
   return (
     <>
       <Hero movie={heroMovie} trailerKey={trailer?.key} type="movie" />
-      <main className="p-6">
+      <MainWrapper>
         <SectionCarousel
           title="Trending This Week"
           data={dataTrendingMixed.map((item) => ({
@@ -61,7 +62,7 @@ export default async function Home() {
           variant="landscape"
           type="series"
         />
-      </main>
+      </MainWrapper>
     </>
   );
 }
