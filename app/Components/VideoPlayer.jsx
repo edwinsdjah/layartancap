@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 
-const VideoPlayer = ({ id, type }) => {
+const VideoPlayer = ({ id, type, season, episode }) => {
   const [isLoading, setIsLoading] = useState(true);
   console.log(type);
   return (
@@ -35,7 +35,7 @@ const VideoPlayer = ({ id, type }) => {
             type === 'movie'
               ? `https://multiembed.mov/?video_id=${id}&tmdb=1`
               : type === 'series'
-              ? `https://multiembed.mov/?video_id=${id}&tmdb=1&s=1&e=2`
+              ? `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${episode}`
               : 'null'
           }
           className={`w-full h-full transition-opacity duration-500 ${

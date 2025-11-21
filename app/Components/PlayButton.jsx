@@ -6,32 +6,70 @@ import { checkSuperembedAvailability } from '../../utils/checkSuperEmbed';
 // dynamic import VideoPlayer
 const VideoPlayer = dynamic(() => import('./VideoPlayer'), { ssr: false });
 
-const PlayButton = ({ id, type = 'movie', className = '', season, episode, fullWidth }) => {
+const PlayButton = ({
+  id,
+  type = 'movie',
+  className = '',
+  season,
+  episode,
+  fullWidth,
+}) => {
   const [available, setAvailable] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [checking, setChecking] = useState(false);
   const [open, setOpen] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
 
+  // === MOVIE: cek di awal seperti biasa ===
   useEffect(() => {
-    if (!id) return;
-
-    setLoading(true);
-
+    if (type !== 'movie' || !id) {
+      // untuk SERIES → skip cek awal
+      setInitialLoading(false);
+      return;
+    }
+    setInitialLoading(true);
     checkSuperembedAvailability(id, type, season, episode)
       .then(res => {
         setAvailable(res);
-        setLoading(false);
+        setInitialLoading(false);
       })
       .catch(() => {
         setAvailable(false);
-        setLoading(false);
+        setInitialLoading(false);
       });
-  }, [id, type]);
+  }, [id, type, season, episode]);
+
+  // === CLICK HANDLER ===
+  const handleClick = async () => {
+    // SERIES: klik dulu → baru cek
+    if (type === 'series') {
+      setChecking(true);
+
+      const ok = await checkSuperembedAvailability(id, type, season, episode);
+
+      setChecking(false);
+
+      if (!ok) {
+        alert('Episode not available.');
+        return;
+      }
+
+      setOpen(true);
+      return;
+    }
+
+    // MOVIE: langsung buka karena sudah dicek di awal
+    if (available) {
+      setOpen(true);
+    }
+  };
+
+  const disabled = type === 'movie' ? initialLoading || !available : checking; // series hanya disable saat checking
 
   return (
     <>
       {open && (
         <div className='fixed inset-0 bg-black/90 z-[999]'>
-          <VideoPlayer id={id} type={type} />
+          <VideoPlayer id={id} type={type} season={season} episode={episode} />
           <button
             onClick={() => setOpen(false)}
             className='absolute top-4 right-4 text-white text-3xl'
@@ -42,23 +80,24 @@ const PlayButton = ({ id, type = 'movie', className = '', season, episode, fullW
       )}
 
       <button
-        disabled={!available || loading}
-        onClick={() => setOpen(true)}
+        disabled={disabled}
+        onClick={handleClick}
         className={`
           flex items-center gap-2 px-6 py-2 rounded-md font-semibold shadow-md transition
           ${
-            loading
-              ? 'bg-gray-500 cursor-wait text-white'
-              : available
-              ? 'bg-green-500 hover:bg-green-600 text-white cursor-pointer'
-              : 'bg-gray-600 cursor-not-allowed text-white/60'
+            disabled
+              ? 'bg-gray-600 cursor-not-allowed text-white/60'
+              : 'bg-green-500 hover:bg-green-600 text-white cursor-pointer'
           }
           ${fullWidth ? 'w-full text-center justify-center flex' : ''}
           ${className}
         `}
       >
         <i className='fa fa-play' />
-        {loading ? 'Checking...' : available ? 'Play' : 'Not Available'}
+        {type === 'movie' && initialLoading && 'Checking...'}
+        {type === 'movie' && !initialLoading && !available && 'Not Available'}
+        {type === 'movie' && !initialLoading && available && 'Play'}
+        {type === 'series' && (checking ? 'Checking...' : 'Play')}
       </button>
     </>
   );
