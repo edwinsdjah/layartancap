@@ -7,6 +7,9 @@ import SimiliarCard from './SimiliarCard';
 import { FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
 import { useModal } from '@/context/ModalContext'; // ⬅️ IMPORT CONTEXT
 import PlayButton from './PlayButton';
+import { initDeviceDetection } from '@/helpers/detectDevice';
+import { useDeviceStore } from '@/stores/useDeviceStore';
+import MovieCardPortrait from './MovieCardPortrait';
 
 const Modal = () => {
   const { open, selected: movie, closeModal } = useModal(); // ⬅️ AMBIL DARI CONTEXT
@@ -17,9 +20,15 @@ const Modal = () => {
   const [isMuted, setIsMuted] = useState(true);
   const [videoReady, setVideoReady] = useState(false);
   const iframeRef = useRef(null);
-
-
   const trailerKey = movie?.trailerKey;
+  const setIsSP = useDeviceStore((s) => s.setIsSP);
+  const isSP = useDeviceStore((s) => s.isSP);
+  console.log(type)
+  
+  useEffect(() => {
+    const cleanup = initDeviceDetection(setIsSP);
+    return () => cleanup && cleanup();
+  }, [setIsSP]);
 
   // reset state saat movie baru
   useEffect(() => {
@@ -52,7 +61,7 @@ const Modal = () => {
         const res = await fetch(endpoint);
         const data = await res.json();
         setSimiliar(
-          data.results?.filter(item => item.id !== movie.id).slice(0, 9) || []
+          data.results?.filter(item => item.id !== movie.id).slice(0, 12) || []
         );
       } catch (err) {
         console.error('Failed to load similar:', err);
@@ -96,6 +105,7 @@ const Modal = () => {
 
   const cast = movie.cast || [];
 
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -109,15 +119,24 @@ const Modal = () => {
           <div className='absolute inset-0' onClick={closeModal}></div>
 
           <motion.div
-            className='relative w-[90%] max-w-4xl bg-[#141414] rounded-xl max-h-[90vh] overflow-y-auto shadow-2xl'
-            initial={{ scale: 0.8, opacity: 0 }}
+            className={`
+              relative bg-[#141414] shadow-2xl
+              ${isSP ? 'w-full h-full rounded-none' : 'w-[90%] max-w-4xl max-h-[90vh] rounded-xl'}
+              overflow-y-auto
+            `}
+            initial={{ scale: isSP ? 1 : 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
+            exit={{ scale: isSP ? 1 : 0.8, opacity: 0 }}
             transition={{ duration: 0.25 }}
             onClick={e => e.stopPropagation()}
           >
             {/* HEADER VIDEO */}
-            <div className='relative w-full h-64 rounded-t-xl overflow-hidden'>
+            <div
+              className={`
+                ${isSP ? 'sticky top-0 z-20 h-64 rounded-none' : 'relative w-full h-64 rounded-t-xl'}
+                overflow-hidden
+              `}
+            >
               <Image
                 src={img}
                 alt={movie.title || movie.name}
@@ -164,48 +183,33 @@ const Modal = () => {
             </div>
 
             {/* CONTENT */}
-            <div className='p-6'>
-              <h1 className='text-3xl font-bold mb-2'>
-                {movie.title || movie.name}
-              </h1>
+            <div className='p-3'>
+              <h1 className='text-3xl font-bold mb-2'>{movie.title || movie.name}</h1>
 
               <div className='flex items-center gap-4 text-white/80 mb-2'>
                 <span>{releaseYear}</span>
-                <span className='px-2 py-0.5 border border-white/40 rounded text-xs'>
-                  {runtime}
-                </span>
+                <span className='px-2 py-0.5 border border-white/40 rounded text-xs'>{runtime}</span>
               </div>
 
               <div className='flex gap-6 mt-4'>
-                <div className='flex-1 text-white/80 leading-relaxed'>
-                  {movie.overview}
-                </div>
+                <div className='flex-1 text-white/80 leading-relaxed'>{movie.overview}</div>
 
                 <div className='w-1/3 text-white/70 text-sm space-y-3'>
                   <div>
                     <h3 className='font-semibold text-white mb-1'>Cast</h3>
                     <p>
-                      {cast.length > 0
-                        ? cast
-                            .slice(0, 5)
-                            .map(c => c.name)
-                            .join(', ')
-                        : '—'}
+                      {cast.length > 0 ? cast.slice(0, 5).map(c => c.name).join(', ') : '—'}
                     </p>
                   </div>
                   <div>
                     <h3 className='font-semibold text-white mb-1'>Genres</h3>
-                    <p>
-                      {movie.genres?.length > 0
-                        ? movie.genres.map(g => g.name).join(', ')
-                        : '—'}
-                    </p>
+                    <p>{movie.genres?.length > 0 ? movie.genres.map(g => g.name).join(', ') : '—'}</p>
                   </div>
                 </div>
               </div>
 
               <div className='flex gap-3 mb-4'>
-                  <PlayButton id={movie.id} type={type}/>
+                <PlayButton id={movie.id} type={type} />
               </div>
 
               <div className='mb-6'>
@@ -216,23 +220,35 @@ const Modal = () => {
                     <div className='w-10 h-10 border-4 border-white/30 border-t-white rounded-full animate-spin' />
                   </div>
                 ) : similiar.length === 0 ? (
-                  <p className='text-white/50 text-sm'>
-                    No similar titles found.
-                  </p>
+                  <p className='text-white/50 text-sm'>No similar titles found.</p>
                 ) : (
-                  <div className='grid grid-cols-1 sm:grid-cols-3 gap-3'>
-                    {similiar.map(item => (
-                      <SimiliarCard key={item.id} item={item} id={item.id} type={type} />
-                    ))}
+                  <div
+                    className={`grid ${
+                      isSP ? 'grid-cols-3 gap-2' : 'grid-cols-1 sm:grid-cols-3 gap-3'
+                    }`}
+                  >
+                    {similiar.map(item =>
+                      isSP ? (
+                        <MovieCardPortrait
+                          key={item.id}
+                          movie={item}
+                          id={item.id}
+                          type={type}
+                          isSP={isSP}
+                        />
+                      ) : (
+                        <SimiliarCard key={item.id} item={item} id={item.id} type={type} />
+                      )
+                    )}
                   </div>
                 )}
               </div>
             </div>
-
           </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
+
   );
 };
 

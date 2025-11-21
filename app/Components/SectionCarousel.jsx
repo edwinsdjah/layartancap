@@ -25,9 +25,10 @@ export default function SectionCarousel({
           {data?.map((movie, i) => (
             <div key={movie.id} className='relative flex-shrink-0'>
               {variant === 'trending' && (
-                <span className='absolute -left-5 bottom-2 text-[100px] font-black text-white z-10'>
-                  {i + 1}
-                </span>
+               <span className='absolute -left-2 bottom-2 text-[100px] font-extrabold z-10
+             text-black [text-shadow:2px_2px_0_white,-2px_-2px_0_white,2px_-2px_0_white,-2px_2px_0_white]'>
+                {i + 1}
+              </span>
               )}
 
               <CardComponent movie={movie} type={movie.type || type} />

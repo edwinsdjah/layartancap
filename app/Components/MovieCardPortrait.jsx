@@ -3,7 +3,7 @@ import Link from 'next/link';
 import React from 'react';
 import { useModal } from '../../context/ModalContext';
 
-const MovieCardPortrait = ({ movie, type }) => {
+const MovieCardPortrait = ({ movie, type, isSP }) => {
   // gunakan poster path (portrait)
   const { openModal } = useModal();
   const img = movie.poster_path
@@ -13,7 +13,7 @@ const MovieCardPortrait = ({ movie, type }) => {
   return (
     <div
       onClick={() => openModal(movie, type)}
-      className='relative group cursor-pointer w-[140px] rounded-lg overflow-hidden'
+      className={`relative group cursor-pointer ${isSP ?'w-[100%]': 'w-[140px]' } rounded-lg overflow-hidden`}
     >
       {/* IMAGE */}
       <div className='relative h-[225px]'>

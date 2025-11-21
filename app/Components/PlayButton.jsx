@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { checkSuperembedAvailability } from '../../utils/checkSuperEmbed';
