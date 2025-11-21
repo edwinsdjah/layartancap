@@ -1,22 +1,26 @@
 'use client';
+
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useDeviceStore } from '../../stores/useDeviceStore';
 
 const Navbar = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
 
+  const { isSP } = useDeviceStore(); // ← detect SP or Desktop
+
   const inputRef = useRef(null);
   const searchRef = useRef(null);
 
   const toggleSearch = () => {
     setSearchOpen(prev => !prev);
-    setTimeout(() => inputRef.current?.focus(), 200);
+    setTimeout(() => inputRef.current?.focus(), 150);
   };
 
-  // Detect click outside
+  // Detect click outside input
   useEffect(() => {
     const handleClickOutside = e => {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
@@ -27,7 +31,7 @@ const Navbar = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // ⭐ Detect scroll
+  // Detect scroll
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
@@ -36,15 +40,113 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  if (isSP) {
+    return (
+      <nav
+        className={`
+    fixed top-0 left-0 w-full z-50
+    flex items-center justify-between
+    px-4 h-[55px]
+    transition-all duration-300
+    ${
+      isScrolled
+        ? 'bg-black/90 backdrop-blur-sm'
+        : 'bg-gradient-to-b from-black/60 to-transparent'
+    }
+  `}
+      >
+        {/* LEFT — LOGO */}
+        <Link href='/' className='flex items-center z-20'>
+          <Image
+            src='/logo.png'
+            width={65}
+            height={40}
+            alt='Logo'
+            className='w-[65px]'
+          />
+        </Link>
+
+        {/* CENTER MENU (selalu center karena absolute) */}
+        <div
+          className={`
+      absolute left-1/2 -translate-x-1/2
+      flex items-center gap-6 text-white/80 text-sm
+      transition-all duration-300
+      ${searchOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}
+    `}
+        >
+          <Link href='/' className='hover:text-white'>
+            Home
+          </Link>
+          <Link href='/series' className='hover:text-white'>
+            Series
+          </Link>
+          <Link href='/movies' className='hover:text-white'>
+            Movies
+          </Link>
+        </div>
+
+        {/* RIGHT — SEARCH + USER ICON */}
+        <div className='flex items-center gap-4 z-20'>
+          <div
+            ref={searchRef}
+            className={`
+        relative flex items-center
+        transition-all duration-300
+        ${searchOpen ? 'w-[60vw] max-w-[320px]' : 'w-[24px]'}
+      `}
+          >
+            <input
+              ref={inputRef}
+              type='text'
+              value={searchValue}
+              onChange={e => setSearchValue(e.target.value)}
+              placeholder='Search...'
+              className={`
+          h-[34px] text-white bg-black/70
+          border border-white/20
+          pl-3 text-[14px] outline-none rounded
+          transition-all duration-300
+          ${searchOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'}
+        `}
+            />
+
+            {/* SEARCH ICON */}
+            {!searchOpen && (
+              <i
+                className='bi bi-search text-white text-[20px] absolute right-0 top-1/2 -translate-y-1/2 cursor-pointer'
+                onClick={toggleSearch}
+              ></i>
+            )}
+
+            {/* CLOSE ICON */}
+            {searchOpen && (
+              <i
+                className='bi bi-x-lg text-white text-[20px] absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer'
+                onClick={() => setSearchOpen(false)}
+              ></i>
+            )}
+          </div>
+
+          <Link href='#'>
+            <i className='fa fa-user text-white text-[18px]'></i>
+          </Link>
+        </div>
+      </nav>
+    );
+  }
+
   return (
     <nav
       className={`
-      fixed w-screen z-[1000] px-[57px] h-[80px] flex items-center
-      transition-all duration-300
-      ${
-        isScrolled ? 'bg-black/80 backdrop-blur-sm shadow-md' : 'bg-transparent'
-      }
-    `}
+        fixed w-screen z-[10] px-[57px] h-[80px] flex items-center
+        transition-all duration-300
+        ${
+          isScrolled
+            ? 'bg-black/80 backdrop-blur-sm shadow-md'
+            : 'bg-transparent'
+        }
+      `}
     >
       <div className='w-full flex justify-between items-center'>
         {/* LEFT */}
@@ -96,9 +198,8 @@ const Navbar = () => {
 
         {/* RIGHT */}
         <div className='flex items-center'>
-          {/* SEARCH BOX WRAPPER */}
+          {/* SEARCH */}
           <div className='relative flex items-center' ref={searchRef}>
-            {/* SEARCH INPUT */}
             <input
               ref={inputRef}
               type='text'
@@ -114,7 +215,6 @@ const Navbar = () => {
               `}
             />
 
-            {/* SEARCH ICON */}
             <i
               className='bi bi-search text-white text-[20px] absolute left-2 top-1/2 -translate-y-1/2 cursor-pointer'
               onClick={toggleSearch}

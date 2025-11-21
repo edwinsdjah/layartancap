@@ -68,14 +68,14 @@ const PlayButton = ({
   return (
     <>
       {open && (
-        <div className='fixed inset-0 bg-black/90 z-[999]'>
-          <VideoPlayer id={id} type={type} season={season} episode={episode} />
-          <button
-            onClick={() => setOpen(false)}
-            className='absolute top-4 right-4 text-white text-3xl'
-          >
-            ✕
-          </button>
+        <div className='fixed inset-0 bg-black/90 z-[2000]'>
+          <VideoPlayer
+            id={id}
+            type={type}
+            season={season}
+            episode={episode}
+            onClose={() => setOpen(false)}
+          />
         </div>
       )}
 
