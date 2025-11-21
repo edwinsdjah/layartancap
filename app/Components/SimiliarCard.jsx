@@ -1,6 +1,7 @@
 import { useModal } from '@/context/ModalContext';
 import Image from 'next/image';
 import React from 'react';
+import RuntimeCard from './RuntimeCard';
 
 
 const SimiliarCard = ({ item, id, type }) => {
@@ -13,7 +14,7 @@ const SimiliarCard = ({ item, id, type }) => {
     item.release_date?.slice(0, 4) || item.first_air_date?.slice(0, 4) || '-';
 
   return (
-    <div onClick={()=> {openModal(item, type)}} className='bg-gray-600 rounded-lg overflow-hidden cursor-pointer group shadow-md hover:shadow-lg transition'>
+    <div onClick={()=> {openModal(item, type)}} className='bg-[#232323] rounded-lg overflow-hidden cursor-pointer group shadow-md hover:shadow-lg transition'>
       {/* BACKDROP IMAGE */}
       <div className='relative w-full h-40 sm:h-48'>
         <Image

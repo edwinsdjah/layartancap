@@ -6,7 +6,7 @@ import { checkSuperembedAvailability } from '../../utils/checkSuperEmbed';
 // dynamic import VideoPlayer
 const VideoPlayer = dynamic(() => import('./VideoPlayer'), { ssr: false });
 
-const PlayButton = ({ id, type = 'movie', className = '' }) => {
+const PlayButton = ({ id, type = 'movie', className = '', season, episode, fullWidth }) => {
   const [available, setAvailable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -16,7 +16,7 @@ const PlayButton = ({ id, type = 'movie', className = '' }) => {
 
     setLoading(true);
 
-    checkSuperembedAvailability(id, type)
+    checkSuperembedAvailability(id, type, season, episode)
       .then(res => {
         setAvailable(res);
         setLoading(false);
@@ -53,6 +53,7 @@ const PlayButton = ({ id, type = 'movie', className = '' }) => {
               ? 'bg-green-500 hover:bg-green-600 text-white cursor-pointer'
               : 'bg-gray-600 cursor-not-allowed text-white/60'
           }
+          ${fullWidth ? 'w-full text-center justify-center flex' : ''}
           ${className}
         `}
       >

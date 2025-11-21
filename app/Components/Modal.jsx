@@ -6,15 +6,17 @@ import React, { useEffect, useRef, useState } from 'react';
 import SimiliarCard from './SimiliarCard';
 import { FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
 import { useModal } from '@/context/ModalContext'; // ⬅️ IMPORT CONTEXT
-import PlayButton from './PlayButton';
 import { initDeviceDetection } from '@/helpers/detectDevice';
 import { useDeviceStore } from '@/stores/useDeviceStore';
 import MovieCardPortrait from './MovieCardPortrait';
+import ModalDetail from './ModalDetail';  
+import RuntimeCard from './RuntimeCard';
+import SeriesEpisodeSwitcher from './SeriesEpisodeSwitcher';
 
 const Modal = () => {
   const { open, selected: movie, closeModal } = useModal(); // ⬅️ AMBIL DARI CONTEXT
   const isOpen = open;
-  const type = movie?.type; // 'movie' / 'tv'
+  const type = movie?.type;
   const [similiar, setSimiliar] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
@@ -23,7 +25,7 @@ const Modal = () => {
   const trailerKey = movie?.trailerKey;
   const setIsSP = useDeviceStore((s) => s.setIsSP);
   const isSP = useDeviceStore((s) => s.isSP);
-  console.log(type)
+  
   
   useEffect(() => {
     const cleanup = initDeviceDetection(setIsSP);
@@ -63,6 +65,7 @@ const Modal = () => {
         setSimiliar(
           data.results?.filter(item => item.id !== movie.id).slice(0, 12) || []
         );
+        
       } catch (err) {
         console.error('Failed to load similar:', err);
         setSimiliar([]);
@@ -87,7 +90,26 @@ const Modal = () => {
       );
     }
   };
+  useEffect(() => {
+      if (isOpen) {
+        const scrollY = window.scrollY;
 
+        // Lock body scroll
+        document.body.style.position = "fixed";
+        document.body.style.top = `-${scrollY}px`;
+        document.body.style.width = "100%";
+
+        return () => {
+          // Unlock scroll
+          document.body.style.position = "";
+          document.body.style.top = "";
+          document.body.style.width = "";
+
+          // Kembalikan posisi scroll sebelumnya
+          window.scrollTo(0, scrollY);
+        };
+      }
+    }, [isOpen]);
   if (!isOpen || !movie) return null;
 
   const img = movie.backdrop_path
@@ -97,14 +119,8 @@ const Modal = () => {
   const releaseYear =
     movie.release_date?.slice(0, 4) || movie.first_air_date?.slice(0, 4) || '-';
 
-  const runtime = movie.runtime
-    ? `${movie.runtime} min`
-    : movie.type === 'tv'
-    ? `${movie.number_of_seasons} Seasons`
-    : '—';
-
   const cast = movie.cast || [];
-
+  console.log(movie)
 
   return (
     <AnimatePresence>
@@ -165,12 +181,10 @@ const Modal = () => {
 
               <div className='absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-[#141414]' />
 
-              <button
-                onClick={closeModal}
-                className='absolute top-3 right-3 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 z-10'
-              >
+              <button onClick={()=> closeModal()} className="cursor-pointer absolute top-3 right-3 bg-black/60 hover:bg-black/80 text-white rounded-full w-8 h-8 flex items-center justify-center z-10">
                 ✕
               </button>
+
 
               {trailerKey && (
                 <button
@@ -181,38 +195,16 @@ const Modal = () => {
                 </button>
               )}
             </div>
-
             {/* CONTENT */}
             <div className='p-3'>
               <h1 className='text-3xl font-bold mb-2'>{movie.title || movie.name}</h1>
-
               <div className='flex items-center gap-4 text-white/80 mb-2'>
                 <span>{releaseYear}</span>
-                <span className='px-2 py-0.5 border border-white/40 rounded text-xs'>{runtime}</span>
+                <RuntimeCard movie={movie}/>
               </div>
-
-              <div className='flex gap-6 mt-4'>
-                <div className='flex-1 text-white/80 leading-relaxed'>{movie.overview}</div>
-
-                <div className='w-1/3 text-white/70 text-sm space-y-3'>
-                  <div>
-                    <h3 className='font-semibold text-white mb-1'>Cast</h3>
-                    <p>
-                      {cast.length > 0 ? cast.slice(0, 5).map(c => c.name).join(', ') : '—'}
-                    </p>
-                  </div>
-                  <div>
-                    <h3 className='font-semibold text-white mb-1'>Genres</h3>
-                    <p>{movie.genres?.length > 0 ? movie.genres.map(g => g.name).join(', ') : '—'}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className='flex gap-3 mb-4'>
-                <PlayButton id={movie.id} type={type} />
-              </div>
-
-              <div className='mb-6'>
+              <ModalDetail movie={movie} isSP={isSP} cast={cast} type={type}/>
+              {type === "tv" ? <SeriesEpisodeSwitcher id={movie.id} seasons={movie.seasons}/> : <></> }
+              <div className='my-6'>
                 <h3 className='text-xl font-semibold mb-3'>More like this</h3>
 
                 {loading ? (

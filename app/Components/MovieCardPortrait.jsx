@@ -19,7 +19,7 @@ const MovieCardPortrait = ({ movie, type, isSP }) => {
       <div className='relative h-[225px]'>
         <Image
           src={img}
-          alt={type === 'movie' ? movie.title : movie.name}
+          alt={type === 'movie' ? movie.title : movie.name || 'alt'}
           fill
           className='object-cover transition duration-300 group-hover:brightness-75 group-hover:scale-105'
         />
