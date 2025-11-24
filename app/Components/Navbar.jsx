@@ -1,16 +1,20 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useTransition } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useDeviceStore } from '../../stores/useDeviceStore';
+import { useDebounceCallback } from '../../hooks/useDebounce';
+import { useRouter } from 'next/navigation';
 
 const Navbar = () => {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
 
-  const { isSP } = useDeviceStore(); // ← detect SP or Desktop
+  const { isSP } = useDeviceStore();
 
   const inputRef = useRef(null);
   const searchRef = useRef(null);
@@ -40,20 +44,50 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const debouncedNavigate = useDebounceCallback(query => {
+    startTransition(() => {
+      router.replace(`/search?q=${encodeURIComponent(query)}`);
+    });
+  }, 300);
+
+  // CLOSE SEARCH → clear + close + go home
+  const handleCloseSearch = () => {
+    setSearchValue('');
+    setSearchOpen(false);
+    router.push('/');
+  };
+
+  const onChange = e => {
+    const v = e.target.value;
+    setSearchValue(v);
+
+    // kosong → home
+    if (v.trim() === '') {
+      router.push('/');
+      return;
+    }
+
+    // ada isi → navigate ke /search
+    debouncedNavigate(v);
+  };
+
+  /* ======================
+        MOBILE NAV
+     ====================== */
   if (isSP) {
     return (
       <nav
         className={`
-    fixed top-0 left-0 w-full z-50
-    flex items-center justify-between
-    px-4 h-[55px]
-    transition-all duration-300
-    ${
-      isScrolled
-        ? 'bg-black/90 backdrop-blur-sm'
-        : 'bg-gradient-to-b from-black/60 to-transparent'
-    }
-  `}
+          fixed top-0 left-0 w-full z-50
+          flex items-center justify-between
+          px-4 h-[55px]
+          transition-all duration-300
+          ${
+            isScrolled
+              ? 'bg-black/90 backdrop-blur-sm'
+              : 'bg-gradient-to-b from-black/60 to-transparent'
+          }
+        `}
       >
         {/* LEFT — LOGO */}
         <Link href='/' className='flex items-center z-20'>
@@ -66,14 +100,14 @@ const Navbar = () => {
           />
         </Link>
 
-        {/* CENTER MENU (selalu center karena absolute) */}
+        {/* CENTER MENU */}
         <div
           className={`
-      absolute left-1/2 -translate-x-1/2
-      flex items-center gap-6 text-white/80 text-sm
-      transition-all duration-300
-      ${searchOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}
-    `}
+            absolute left-1/2 -translate-x-1/2
+            flex items-center gap-6 text-white/80 text-sm
+            transition-all duration-300
+            ${searchOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}
+          `}
         >
           <Link href='/' className='hover:text-white'>
             Home
@@ -86,29 +120,29 @@ const Navbar = () => {
           </Link>
         </div>
 
-        {/* RIGHT — SEARCH + USER ICON */}
+        {/* RIGHT — SEARCH */}
         <div className='flex items-center gap-4 z-20'>
           <div
             ref={searchRef}
             className={`
-        relative flex items-center
-        transition-all duration-300
-        ${searchOpen ? 'w-[60vw] max-w-[320px]' : 'w-[24px]'}
-      `}
+              relative flex items-center
+              transition-all duration-300
+              ${searchOpen ? 'w-[60vw] max-w-[320px]' : 'w-[24px]'}
+            `}
           >
             <input
               ref={inputRef}
               type='text'
               value={searchValue}
-              onChange={e => setSearchValue(e.target.value)}
+              onChange={onChange}
               placeholder='Search...'
               className={`
-          h-[34px] text-white bg-black/70
-          border border-white/20
-          pl-3 text-[14px] outline-none rounded
-          transition-all duration-300
-          ${searchOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'}
-        `}
+                h-[34px] text-white bg-black/70
+                border border-white/20
+                pl-3 text-[14px] outline-none rounded
+                transition-all duration-300
+                ${searchOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'}
+              `}
             />
 
             {/* SEARCH ICON */}
@@ -123,7 +157,7 @@ const Navbar = () => {
             {searchOpen && (
               <i
                 className='bi bi-x-lg text-white text-[20px] absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer'
-                onClick={() => setSearchOpen(false)}
+                onClick={handleCloseSearch}
               ></i>
             )}
           </div>
@@ -136,6 +170,9 @@ const Navbar = () => {
     );
   }
 
+  /* ======================
+        DESKTOP NAV
+     ====================== */
   return (
     <nav
       className={`
@@ -149,7 +186,6 @@ const Navbar = () => {
       `}
     >
       <div className='w-full flex justify-between items-center'>
-        {/* LEFT */}
         <div className='flex items-center gap-6'>
           <Link href='/' className='block'>
             <Image
@@ -161,7 +197,6 @@ const Navbar = () => {
             />
           </Link>
 
-          {/* NAV LINKS */}
           <section className='flex gap-4'>
             <Link
               href='/'
@@ -176,7 +211,7 @@ const Navbar = () => {
               TV Shows
             </Link>
             <Link
-              href='#'
+              href='/movies'
               className='text-white/60 hover:text-white text-[16px]'
             >
               Movies
@@ -196,32 +231,41 @@ const Navbar = () => {
           </section>
         </div>
 
-        {/* RIGHT */}
+        {/* SEARCH */}
         <div className='flex items-center'>
-          {/* SEARCH */}
           <div className='relative flex items-center' ref={searchRef}>
             <input
               ref={inputRef}
               type='text'
               value={searchValue}
-              onChange={e => setSearchValue(e.target.value)}
-              placeholder='Search by Movie name'
+              onChange={onChange}
+              placeholder='Search...'
               className={`
-                h-[34px] text-white bg-black/60
-                ${searchOpen ? 'border-white/20' : 'border-transparent'}
-                border pl-[35px] text-[16px] outline-none rounded
-                transition-all duration-300 ease-in-out
-                ${searchOpen ? 'w-[250px] opacity-100' : 'w-0 opacity-0'}
+                h-[34px] text-white bg-black/70
+                border border-white/20
+                pl-3 text-[14px] outline-none rounded
+                transition-all duration-300
+                ${searchOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'}
               `}
             />
 
-            <i
-              className='bi bi-search text-white text-[20px] absolute left-2 top-1/2 -translate-y-1/2 cursor-pointer'
-              onClick={toggleSearch}
-            ></i>
+            {/* OPEN SEARCH ICON */}
+            {!searchOpen && (
+              <i
+                className='bi bi-search text-white text-[20px] absolute right-0 top-1/2 -translate-y-1/2 cursor-pointer'
+                onClick={toggleSearch}
+              ></i>
+            )}
+
+            {/* CLOSE SEARCH ICON */}
+            {searchOpen && (
+              <i
+                className='bi bi-x-lg text-white text-[20px] absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer'
+                onClick={handleCloseSearch}
+              ></i>
+            )}
           </div>
 
-          {/* USER ICON */}
           <section className='ml-[20px] w-[30px] h-[30px] rounded cursor-pointer flex items-center justify-center'>
             <Link href='#'>
               <i className='fa fa-user text-white text-[20px]'></i>
