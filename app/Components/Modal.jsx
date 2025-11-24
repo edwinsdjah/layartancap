@@ -112,7 +112,7 @@ const Modal = () => {
 
   const img = movie.backdrop_path
     ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}`
-    : '/fallback-backdrop.jpg';
+    : '/fallback_backdrop.jpg';
 
   const releaseYear =
     movie.release_date?.slice(0, 4) || movie.first_air_date?.slice(0, 4) || '-';

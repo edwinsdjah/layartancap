@@ -18,7 +18,6 @@ export default function SectionGrid({
 
   const setIsSP = useDeviceStore(s => s.setIsSP);
   const isSP = useDeviceStore(s => s.isSP);
-
   useEffect(() => {
     const cleanup = initDeviceDetection(setIsSP);
     return () => cleanup && cleanup();
@@ -41,21 +40,9 @@ export default function SectionGrid({
       >
         {data?.map((movie, i) => (
           <div key={movie.id} className='relative'>
-            {variant === 'trending' && (
-              <span
-                className='absolute -left-1 bottom-1
-                text-[50px] md:text-[80px] lg:text-[100px]
-                font-extrabold z-10
-                text-black
-                [text-shadow:2px_2px_0_white,-2px_-2px_0_white,2px_-2px_0_white,-2px_2px_0_white]'
-              >
-                {i + 1}
-              </span>
-            )}
-
             <CardComponent
               movie={movie}
-              type={movie.type || type}
+              type={type || movie.type}
               isSP={isSP}
             />
           </div>

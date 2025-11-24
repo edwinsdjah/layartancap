@@ -1,23 +1,25 @@
+import React from 'react';
+import SectionCarousel from '../Components/SectionCarousel';
+import Hero from '../Components/Hero';
+import MainWrapper from '../Components/MainWrapper';
 import {
-  getMoviesByGenre,
-  getMovieVideo,
   getNowPlayingMovies,
   getTopRatedMovies,
   getTrendingMovieThisWeek,
-} from './lib/tmdb/movies';
-import SectionCarousel from './Components/SectionCarousel';
-import Hero from './Components/Hero';
-import { getTrendingSeries } from './lib/tmdb/series';
-import { getTrendingMixed } from '@/app/lib/tmdb/mixed';
-import MainWrapper from './Components/MainWrapper';
+  getMoviesByGenre,
+  getMovieVideo,
+  genreIds,
+} from '../lib/tmdb/movies';
 
-export default async function Home() {
-  const dataTrendingMixed = await getTrendingMixed(20);
+const page = async () => {
   const dataResultThisWeek = await getTrendingMovieThisWeek();
   const dataNowPlaying = await getNowPlayingMovies();
   const dataTopRated = await getTopRatedMovies();
-  const dataActionMovies = await getMoviesByGenre(28);
-  const dataTrendingSeries = await getTrendingSeries();
+  const dataActionMovies = await getMoviesByGenre(genreIds.action);
+  const dataHorrorMovies = await getMoviesByGenre(genreIds.horror);
+  const dataComedyMovies = await getMoviesByGenre(genreIds.comedy);
+  const dataFamilyMovies = await getMoviesByGenre(genreIds.family);
+  const dataAnimationMovies = await getMoviesByGenre(genreIds.animation);
   const randomIndex = Math.floor(Math.random() * dataResultThisWeek.length);
   const heroMovie = dataResultThisWeek[randomIndex];
   const video = await getMovieVideo(heroMovie.id);
@@ -29,7 +31,7 @@ export default async function Home() {
       <MainWrapper>
         <SectionCarousel
           title='Trending This Week'
-          data={dataTrendingMixed.map(item => ({
+          data={dataResultThisWeek.map(item => ({
             ...item,
             type: item.media_type === 'tv' ? 'series' : 'movie',
           }))}
@@ -55,12 +57,32 @@ export default async function Home() {
           type='movie'
         />
         <SectionCarousel
-          title='Recommended TV Series'
-          data={dataTrendingSeries}
+          title='Kids Will Love It'
+          data={dataAnimationMovies}
           variant='landscape'
-          type='series'
+          type='movie'
+        />
+        <SectionCarousel
+          title='Unstoppable Laugh'
+          data={dataComedyMovies}
+          variant='landscape'
+          type='movie'
+        />
+        <SectionCarousel
+          title='Cozy on Couch'
+          data={dataFamilyMovies}
+          variant='landscape'
+          type='movie'
+        />
+        <SectionCarousel
+          title='Shiver Down to Spine'
+          data={dataHorrorMovies}
+          variant='landscape'
+          type='movie'
         />
       </MainWrapper>
     </>
   );
-}
+};
+
+export default page;
