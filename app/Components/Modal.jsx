@@ -213,7 +213,10 @@ const Modal = () => {
               </div>
               <ModalDetail movie={movie} isSP={isSP} cast={cast} type={type} />
               {type === 'tv' ? (
-                <SeriesEpisodeSwitcher id={movie.id} seasons={movie.seasons} />
+                <SeriesEpisodeSwitcher
+                  id={movie.id}
+                  seasons={movie.seasons || '1'}
+                />
               ) : (
                 <></>
               )}

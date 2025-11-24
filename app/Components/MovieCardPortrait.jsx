@@ -8,12 +8,14 @@ const MovieCardPortrait = ({ movie, type, isSP }) => {
   const { openModal } = useModal();
   const img = movie.poster_path
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-    : '/no-image.jpg';
+    : '/no_image.png';
 
   return (
     <div
-      onClick={() => openModal(movie, type)}
-      className={`relative group cursor-pointer ${isSP ?'w-[100%]': 'w-[140px]' } rounded-lg overflow-hidden`}
+      onClick={() => openModal(movie, type || movie.type)}
+      className={`relative group cursor-pointer ${
+        isSP ? 'w-[100%]' : 'w-[140px]'
+      } rounded-lg overflow-hidden`}
     >
       {/* IMAGE */}
       <div className='relative h-[225px]'>
