@@ -12,6 +12,8 @@ import MovieCardPortrait from './MovieCardPortrait';
 import ModalDetail from './ModalDetail';
 import RuntimeCard from './RuntimeCard';
 import SeriesEpisodeSwitcher from './SeriesEpisodeSwitcher';
+import AgeRatingBadge from './RatingCard';
+import FormatBadges from './FormatBadges';
 
 const Modal = () => {
   const { open, selected: movie, closeModal } = useModal(); // ⬅️ AMBIL DARI CONTEXT
@@ -112,12 +114,12 @@ const Modal = () => {
 
   const img = movie.backdrop_path
     ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}`
-    : '/fallback_backdrop.jpg';
+    : '/fallback_backdrop.png';
 
   const releaseYear =
     movie.release_date?.slice(0, 4) || movie.first_air_date?.slice(0, 4) || '-';
-
   const cast = movie.cast || [];
+  console.log(movie);
 
   return (
     <AnimatePresence>
@@ -210,7 +212,10 @@ const Modal = () => {
               <div className='flex items-center gap-4 text-white/80 mb-2'>
                 <span>{releaseYear}</span>
                 <RuntimeCard movie={movie} />
+                <AgeRatingBadge rating={movie.ageRating} />
+                <FormatBadges formats={['HD', 'Dolby Vision']} />
               </div>
+
               <ModalDetail movie={movie} isSP={isSP} cast={cast} type={type} />
               {type === 'tv' ? (
                 <SeriesEpisodeSwitcher
