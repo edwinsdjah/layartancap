@@ -3,18 +3,22 @@ import Image from 'next/image';
 import React from 'react';
 import RuntimeCard from './RuntimeCard';
 
-
 const SimiliarCard = ({ item, id, type }) => {
-  const {openModal} = useModal();
+  const { openModal } = useModal();
   const imgUrl = item.backdrop_path
     ? `https://image.tmdb.org/t/p/w780${item.backdrop_path}`
-    : '/fallback-backdrop.jpg';
+    : '/fallback_backdrop.png';
 
   const releaseYear =
     item.release_date?.slice(0, 4) || item.first_air_date?.slice(0, 4) || '-';
 
   return (
-    <div onClick={()=> {openModal(item, type)}} className='bg-[#232323] rounded-lg overflow-hidden cursor-pointer group shadow-md hover:shadow-lg transition'>
+    <div
+      onClick={() => {
+        openModal(item, type);
+      }}
+      className='bg-[#232323] rounded-lg overflow-hidden cursor-pointer group shadow-md hover:shadow-lg transition'
+    >
       {/* BACKDROP IMAGE */}
       <div className='relative w-full h-40 sm:h-48'>
         <Image
