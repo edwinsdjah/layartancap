@@ -1,5 +1,15 @@
 import { tmdbServerFetch } from './server';
 
+export const genreIds = {
+  action: 28,
+  drama: 18,
+  comedy: 35,
+  horror: 27,
+  family: 10751,
+  adventure: 12,
+  animation: 16,
+};
+
 export async function getTrendingMovieThisWeek(limit = 10) {
   const res = await tmdbServerFetch('/trending/movie/week?language=en-US');
   return res?.results?.slice(0, limit) || [];

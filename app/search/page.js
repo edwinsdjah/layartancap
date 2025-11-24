@@ -1,5 +1,5 @@
 import SearchResultList from '../Components/SearchResultList';
-import { tmdbServerFetch } from '../../lib/tmdb/server';
+import { tmdbServerFetch } from '../lib/tmdb/server';
 
 export default async function SearchPage({ searchParams }) {
   const getParams = await searchParams;
@@ -22,10 +22,12 @@ export default async function SearchPage({ searchParams }) {
       `/search/multi?query=${encodeURIComponent(q)}&include_adult=false`
     );
 
-    results = (data?.results || []).filter(
-      item => item.media_type === 'movie' || item.media_type === 'tv'
-    );
-    console.log(results);
+    results = (data?.results || [])
+      .filter(item => item.media_type === 'movie' || item.media_type === 'tv')
+      .map(item => ({
+        ...item,
+        type: item.media_type === 'tv' ? 'series' : item.media_type,
+      }));
   } catch (err) {
     console.error('SSR fetch error:', err);
   }
