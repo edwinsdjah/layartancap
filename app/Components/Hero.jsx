@@ -127,7 +127,7 @@ const Hero = ({ movie, trailerKey, type }) => {
         <div className='absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent' />
 
         {/* CONTENT */}
-        <div className='absolute bottom-[20%] left-6 md:left-12 max-w-2xl z-20'>
+        <div className='absolute bottom-[20%] left-6 md:left-12 max-w-2xl z-5'>
           <h1 className='text-4xl md:text-6xl font-bold mb-4'>
             {type === 'movie' ? movie.title : movie.name}
           </h1>
